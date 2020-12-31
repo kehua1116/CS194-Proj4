@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CS194 Project4 Lucy Wang</title>
+	<link rel="stylesheet" type="text/css" href="website.css">
+	<link href='http://fonts.googleapis.com/css?family=Arial' rel='stylesheet'>
+</head>
+<body>
+
+<div align='middle'>
+	<h1>Facial Keypoint Detection with Neural Networks</h1>
+	<p class="author">Lucy Wang</p>
+	<br>
+	<img id="compact"src="personal_resnet0.jpg" align="middle" width="350px" />
+	<h4 align='left'>Overview</h4>
+	<p font-weight=400 align='left'>Facial points detection can always be a pain in computer vision problems. In this project, I trained Convolutional Neural Networks (CNN) with IMM and Ibug datasets using Pytorch to automate the facial points detection process. I first start with a shallow network to build a nose detection model, then deepen the network to detect the entire face, finally trained with ResNet on a larger dataset (Ibug dataset with 6K images) to achieve better result. </p>
+
+	<br>
+
+	<div>
+	<h2> 1. Nose Tip Detection</h2>
+		<h4 align='left'>Dataloader</h4>
+		<p align='left'>Let's first start with nose detection. We use the <a href="http://www2.imm.dtu.dk/~aam/datasets/datasets.html">IMM Face Database</a>as the training dataset, which contains 240 facial images of 40 persons and each person has 6 facial images in different viewpoints. All images are annotated with 58 facial keypoints. All images are resized to 60x80, normalized and converted to grayscale. Here are some instances of the training images with corresponding nose labels:</p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="dataloader_0.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader_1.jpg" align="middle" width="250px" />
+					</td>	
+					<td>
+						<img id="compact"src="dataloader_2.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader_3.jpg" align="middle" width="250px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+		<h4 align='left'>CNN Model</h4>
+		<p align='left'>For detecting the nose points, I implemented a shallow CNN with 3 convolutional layers and 2 linear layers. Each convolution layer is followed by max pooling and ReLu. The Model architecture is as follows: </p>
+		<img id="compact"src="net1.jpg" align="middle" width="450px" />
+
+
+		<p align='left'>I then train the model for 25 epochs, with batch_size = 1, learning_rate = 0.0001, and achieved the following training & validation loss: </p>
+		<img id="compact"src="training_plot.jpg" align="middle" width="450px" />
+
+		<p align='left'>Here are some of the results when model is applied on validation data (Red indicates ground truth point, Green indicates predicted point). Again, similar to nose prediction, the side faces are not being predicted very well. They are being predicted entirely as front faces, which is easier to predict. This is still due to our limited data. </p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="training_nose_0.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="training_nose_1.jpg" align="middle" width="250px" />
+					</td>	
+					<td>
+						<img id="compact"src="training_nose_2.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="training_nose_3.jpg" align="middle" width="250px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+	</div>
+	<br>
+	<div>
+		<h2> 2. Full Facial Keypoints Detection</h2>
+		<h4 align='left'>Dataloader</h4>
+		<p align='left'>In this part, let's predict facil keypoints for the entire face. The dataset is the same as before, but we resize the image to be larger than before (120x160), which captures more information. In order to add more variety to the data, we used <b>data augmentation</b> techniques by randomly rotate the image in a angle between -15 and 15 degrees. Here are some pictures used for training:</p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="dataloader2_0.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader2_1.jpg" align="middle" width="250px" />
+					</td>	
+					<td>
+						<img id="compact"src="dataloader2_2.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader2_3.jpg" align="middle" width="250px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+		<h4 align='left'>CNN Model</h4>
+		<p align='left'>I changed the CNN model to have 5 convolutional layers and 2 linear layers. Each convolution layer is followed by max pooling and ReLu. The output layer has 58 * 2 classes (one for each x, y coordinate of a key point).The Model architecture is as follows: </p>
+		<img id="compact"src="net2.jpg" align="middle" width="450px" />
+
+
+		<p align='left'>I then train the model for 15 epochs, with batch_size = 4, learning_rate = 0.005, and achieved the following training & validation loss: </p>
+		<img id="compact"src="training_face_plot.jpg" align="middle" width="450px" />
+
+		<p align='left'>Here are some of the results when model is applied on validation data (Red indicates ground truth point, Green indicates predicted point). As you can see, the last two pictures are being predicted very well. Since our dataset is relatively small, and we have limited number of side faces in the dataset, it's hard for the model to predict well on the side faces.</p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="training_face_0.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="training_face_2.jpg" align="middle" width="250px" />
+					</td>	
+					<td>
+						<img id="compact"src="training_face_4.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="training_face_5.jpg" align="middle" width="250px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+		<p align='left'>We can also visualize the learned filters for every convolution layer. </p>
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="learned_filters.jpg" align="middle" width="350px" /><figcaption align="middle">
+							Learned Filters for 1st Conv2d Layer
+						</figcaption>
+					</td>
+					<td>
+						<img id="compact"src="learned_filters2.jpg" align="middle" width="250px" /><figcaption align="middle">
+							Lerned Filters for 2nd Conv2d Layer
+						</figcaption>
+					</td>
+									
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<br>
+
+	<div>
+		<h2> 3. Train With Larger Dataset</h2>
+		<h4 align='left'>Dataloader</h4>
+		<p align='left'>In order to achieve better and more robust results, we switched to the <a href="https://people.eecs.berkeley.edu/~zhecao/ibug_300W_large_face_landmark_dataset.zip">Ibug dataset</a>, which contains 6666 images, each taken in different backgrounds. Each image is annotated with 68 facial points. Since the face may occupy only a very small fraction of the entire image, we first crop the image to only its face portion, then resize it to 224x224 and rotate it. Finally we normalize and convert it to grayscale. Here are some instances of the training images with corresponding landmarks:</p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="dataloader3_4.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader3_1.jpg" align="middle" width="250px" />
+					</td>	
+					<td>
+						<img id="compact"src="dataloader3_2.jpg" align="middle" width="250px" />
+					</td>
+					<td>
+						<img id="compact"src="dataloader3_3.jpg" align="middle" width="250px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+		<h4 align='left'>CNN Model</h4>
+		<p align='left'>In this part, I used a predefined model <b>Resnet18</b>, which has the following architecture. I also made the following modifications: 
+			<ol align='left'>
+			<li>Change conv1's first input to be 1, since we use grayscale images</li>
+			<li>Change the number of output class to be 68 * 2, which are the x, y coordinates of each facial point. </li>
+			</ol>
+		</p>
+		<img id="compact"src="net3.jpg" align="middle" width="850px" />
+		<figcaption align="middle">
+							(image from researchgate.net)</figcaption>
+
+		<br>
+
+		<p align='left'>I then train the model for 15 epochs, with batch_size = 128, learning_rate = 0.005, and achieved the following training & validation loss: </p>
+		<img id="compact"src="training_resnet_plot.jpg" align="middle" width="450px" />
+
+		<br>
+
+		<p align='left'>Then I tested the model on some brand new images, and here are the results. Overall, we can see that the model is performing well at detecting the eyes, but it still fails to detect the shape of the face sometimes. I also submitted the test results on Kaggle, which achieved an SME of 30.7. </p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="testing_resnet_0.jpg" align="middle" width="200px" />
+					</td>
+					<td>
+						<img id="compact"src="testing_resnet_1.jpg" align="middle" width="200px" />
+					</td>	
+					<td>
+						<img id="compact"src="testing_resnet_2.jpg" align="middle" width="200px" />
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<img id="compact"src="testing_resnet_3.jpg" align="middle" width="200px" />
+					</td>
+					<td>
+						<img id="compact"src="testing_resnet_4.jpg" align="middle" width="200px" />
+					</td>
+					<td>
+						<img id="compact"src="testing_resnet_5.jpg" align="middle" width="200px" />
+					</td>				
+				</tr>
+			</table>
+		</div>
+
+		<p align='left'>Finally, I used the model to predict facial keypoints on some images I chose. Similar to the previous procedures, I first cropped the image to only the face portion, predict the points, then shape back to the original size. The model actually predicted pretty well except for the shape of the face! </p>
+
+		<div align='middle'>
+			<table style="width=100%">
+				<tr>
+					<td>
+						<img id="compact"src="personal_resnet0.jpg" align="middle" width="350px" />
+						<figcaption align="middle">
+							The Dragon Queen
+						</figcaption>
+					</td>
+					<td>
+						<img id="compact"src="personal_resnet1.jpg" align="middle" width="350px" />
+						<figcaption align="middle">
+							Gong Yoo
+						</figcaption>
+					</td>	
+					<td>
+						<img id="compact"src="personal_resnet2.jpg" align="middle" width="350px" />
+						<figcaption align="middle">
+							Jennifer Lawrence
+						</figcaption>
+					</td>
+			
+				</tr>
+			</table>
+		</div>
+	</div>
+	<br>
+
+	<div>
+		<h2> 4. Conclusion</h2>
+		<p align="left">Although this project is very time consuming, I really had fun learning more about CNN and Pytorch. Facial points detection can be very useful in the real world, and I would love to continue explore more training models and methods to achieve better results in the future. </p>
+	</div>
+
+</div>
